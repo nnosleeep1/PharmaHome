@@ -23,6 +23,7 @@ import entity.VaiTro;
 import gui.Customers_GUI;
 import gui.Employees_GUI;
 import gui.KetCa;
+import gui.LichSuHoaDon_GUI;
 import gui.LoginForm;
 import gui.NhaCungCap_GUI;
 import gui.Order_GUI;
@@ -198,11 +199,12 @@ public class Main extends javax.swing.JFrame {
         initHeaderLabel();
         header = new Header(nhanVien.getTenNhanVien(), vaiTro.getTen(), this);
         main = new MainForm();
+        main.showForm(new Order_GUI(tk));
 
         menu.addEvent(new EventMenuSelected() {
             @Override
             public void menuSelected(int menuIndex, int subMenuIndex) {
-                System.out.println("Menu index: " + menuIndex + "Sub Index: " + subMenuIndex);
+
                 if (menuIndex == 0) {
                     try {
                         main.showForm(new Products_GUI());
@@ -216,6 +218,9 @@ public class Main extends javax.swing.JFrame {
 
                     } else if (subMenuIndex == 1) {
                         main.showForm(new Return_Order_GUI(tk));
+
+                    } else if (subMenuIndex == 2) {
+                        main.showForm(new LichSuHoaDon_GUI());
 
                     }
                 } else if (menuIndex == 2) {
@@ -314,6 +319,7 @@ public class Main extends javax.swing.JFrame {
             }
         });
     }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {

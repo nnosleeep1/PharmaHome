@@ -6,11 +6,17 @@ import entity.NhanVien;
 import entity.Voucher;
 import connect.ConnectDB;
 import entity.ChiTietHoaDon;
+import entity.DonViTinh;
+import entity.LoaiThuoc;
+import entity.NhaCungCap;
 import entity.ThangVaDoanhThu;
 import entity.Thuoc;
+import entity.XuatXu;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import utilities.ConvertDate;
 
 public class HoaDon_DAO {
@@ -78,7 +84,7 @@ public class HoaDon_DAO {
                 double tongTien = rs.getDouble("tongTien");
 
                 String maVoucher = rs.getString("maVoucher");
-                String maKhachHang = rs.getString("maKhachHang");
+                String maKhachHang = rs.getString("maKH");
                 String maNhanVien = rs.getString("maNhanVien");
 
                 Voucher voucher = new Voucher_DAO().getVoucher(maVoucher);
@@ -261,8 +267,6 @@ public class HoaDon_DAO {
         return count;
     }
 
- 
-
     ArrayList<HoaDon> getTatCaHoaDonTrongKetToan(String maKetToan) {
         ArrayList<HoaDon> kq = new ArrayList<>();
         try {
@@ -294,5 +298,66 @@ public class HoaDon_DAO {
             e.printStackTrace();
         }
         return kq;
+    }
+
+    public ArrayList<HoaDon> filter(String maHD, String sdt, double doanhThu, LocalDate ngayBatDau, LocalDate ngayKetThuc) {
+        ArrayList<HoaDon> list = new ArrayList<>();
+
+        try {
+            int index = 1;
+            StringBuilder query = new StringBuilder("SELECT maHD,nv.tenNhanVien,kh.sdt,ngayLap,tongTien,maVoucher,hd.maKH,hd.maNhanVien from HoaDon hd "
+                    + "JOIN NhanVien nv ON nv.maNhanVien = hd.maNhanVien "
+                    + "JOIN KhachHang kh ON kh.maKhachHang = hd.maKH WHERE 1=1 ");
+
+            if (!maHD.equalsIgnoreCase("")) {
+                query.append("AND maHD = ? ");
+            }
+            if (!sdt.equalsIgnoreCase("")) {
+                query.append("AND kh.sdt = ? ");
+            }
+            if (doanhThu != 0) {
+                query.append("AND tongTien > ? ");
+            }
+            if (ngayBatDau != null && ngayKetThuc != null) {
+                query.append("AND ngayLap > ? and ngayLap < ? ");
+            }
+
+            PreparedStatement ps = ConnectDB.conn.prepareStatement(query.toString());
+            System.out.println(query);
+
+            if (!maHD.equalsIgnoreCase("")) {
+                ps.setString(index++, maHD);
+            }
+            if (!sdt.equalsIgnoreCase("")) {
+                ps.setString(index++, sdt);
+            }
+            if (doanhThu > 0) {
+                ps.setDouble(index++, doanhThu);
+            }
+            if (ngayBatDau != null && ngayKetThuc != null) {
+                ps.setDate(index++, Date.valueOf(ngayBatDau));
+                ps.setDate(index++, Date.valueOf(ngayKetThuc));
+            }
+
+            ResultSet resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                String maHoaDon = resultSet.getString("maHD");
+                LocalDate ngayLap = ConvertDate.convert(resultSet.getDate("ngayLap"));
+                Double tongTien = resultSet.getDouble("tongTien");
+                String maNV = resultSet.getString("maNhanVien");
+                String maKH = resultSet.getString("maKH");
+                String maVoucher = resultSet.getString("maVoucher");
+                HoaDon hoaDon = null;
+                if (maVoucher != null) {
+                    hoaDon = new HoaDon(maHoaDon, ngayLap, tongTien, new Voucher_DAO().getVoucher(maVoucher), new KhachHang_DAO().getKhachHang(maKH), new NhanVien_DAO().getNhanVien(maNV), this.getChiTietHoaDon(maHD));
+                } else {
+                    hoaDon = new HoaDon(maHoaDon, ngayLap, tongTien, new Voucher_DAO().getVoucher(maVoucher), new KhachHang_DAO().getKhachHang(maKH), new NhanVien_DAO().getNhanVien(maNV), this.getChiTietHoaDon(maHD));
+                }
+                list.add(hoaDon);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Thuoc_DAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
     }
 }

@@ -131,7 +131,7 @@ public class MenuItem extends javax.swing.JPanel {
         float ay = alpha * size;
         float ay1 = (1f - alpha) * size;
         g2.drawLine(x, (int) (y + ay), x + 4, (int) (y + ay1));
-        g2.drawLine((x + 4) , (int) (y + ay1), x + 8, (int) (y + ay));
+        g2.drawLine((x + 4), (int) (y + ay1), x + 8, (int) (y + ay));
 
     }
 
