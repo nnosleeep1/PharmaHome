@@ -6,7 +6,6 @@ package main;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLaf;
-import gui.ThongKeThuoc_GUI;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.IntelliJTheme;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -21,8 +20,12 @@ import entity.NhanVien;
 import entity.TaiKhoan;
 import entity.VaiTro;
 import gui.Customers_GUI;
+import gui.DanhSachPhieuKetToan_GUI;
+import gui.DanhSachPhieuKiemTien_GUI;
 import gui.Employees_GUI;
 import gui.KetCa;
+import gui.KetToan_GUI;
+import gui.KiemTien_GUI;
 import gui.LichSuHoaDon_GUI;
 import gui.LoginForm;
 import gui.NhaCungCap_GUI;
@@ -31,7 +34,7 @@ import gui.Products_GUI;
 import gui.Return_Order_GUI;
 import gui.ThongKeDoanhThu;
 import gui.ThongKeKhachHang;
-import gui.ThongKeThuoc_GUI;
+import gui.ThongKeThuoc;
 import gui.event.EventMenuSelected;
 import gui.event.EventShowPopupMenu;
 import gui.main.MainForm;
@@ -208,26 +211,22 @@ public class Main extends javax.swing.JFrame {
                 if (menuIndex == 0) {
                     try {
                         main.showForm(new Products_GUI());
-
                     } catch (UnsupportedLookAndFeelException ex) {
                         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } else if (menuIndex == 1) {
                     if (subMenuIndex == 0) {
                         main.showForm(new Order_GUI(tk));
-
                     } else if (subMenuIndex == 1) {
                         main.showForm(new Return_Order_GUI(tk));
 
                     } else if (subMenuIndex == 2) {
                         main.showForm(new LichSuHoaDon_GUI());
-
                     }
                 } else if (menuIndex == 2) {
                     if (subMenuIndex == 0) {
                         try {
-                            main.showForm(new ThongKeThuoc_GUI());
-
+                            main.showForm(new ThongKeThuoc());
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             // Show an error message to the user
@@ -235,31 +234,35 @@ public class Main extends javax.swing.JFrame {
                         }
                     } else if (subMenuIndex == 1) {
                         main.showForm(new ThongKeKhachHang());
-
                     } else if (subMenuIndex == 2) {
                         try {
                             main.showForm(new ThongKeDoanhThu());
-
                         } catch (SQLException ex) {
                             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                    } else if (subMenuIndex == 3) {
-                        main.showForm(new KetCa());
-
                     }
                 } else if (menuIndex == 3) {
-                    main.showForm(new Customers_GUI());
+                    if (subMenuIndex == 0) {
+                        main.showForm(new KiemTien_GUI(tk));
+                    } else if (subMenuIndex == 1) {
+                        main.showForm(new KetToan_GUI(tk));
+                    } else if (subMenuIndex == 2) {
+                        main.showForm(new DanhSachPhieuKiemTien_GUI());
+                    } else if (subMenuIndex == 3) {
+                        main.showForm(new DanhSachPhieuKetToan_GUI());
+                    }
 
                 } else if (menuIndex == 4) {
+                    main.showForm(new Customers_GUI());
+
+                } else if (menuIndex == 5) {
                     try {
                         main.showForm(new Employees_GUI());
-
                     } catch (SQLException ex) {
                         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } else if (menuIndex == 5) {
+                } else if (menuIndex == 6) {
                     main.showForm(new NhaCungCap_GUI());
-
                 }
             }
         });

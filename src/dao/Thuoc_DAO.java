@@ -21,7 +21,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.time.LocalDate;
 
-
 public class Thuoc_DAO {
 
     // Phương thức tạo mới một đối tượng Thuoc
@@ -47,6 +46,76 @@ public class Thuoc_DAO {
             e.printStackTrace();
         }
         return n > 0;
+    }
+
+    public Thuoc getThuocTheoMa(String mt) {
+        try {
+            PreparedStatement ps = ConnectDB.conn.prepareStatement("SELECT * FROM Thuoc WHERE maThuoc = ?");
+            ps.setString(1, mt);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String maThuoc = rs.getString("maThuoc");
+                String tenThuoc = rs.getString("tenThuoc");
+                double gia = rs.getDouble("gia");
+
+                Date hsdDate = rs.getDate("hsd");
+                LocalDate hsd = (hsdDate != null) ? hsdDate.toLocalDate() : null;
+                System.out.println(hsd);
+
+                Date nsxDate = rs.getDate("nsx");
+                LocalDate nsx = (nsxDate != null) ? nsxDate.toLocalDate() : null;
+
+                double thue = rs.getDouble("thue");
+                int soLuongTon = rs.getInt("soLuongTon");
+                String mota = rs.getString("mota");
+
+                LoaiThuoc maLoai = new LoaiThuoc(rs.getString("maLoai"));
+                XuatXu maXuatXu = new XuatXu(rs.getString("maXuatXu"));
+                DonViTinh maDonViTinh = new DonViTinh(rs.getString("maDonViTinh"));
+
+                NhaCungCap maNCC = new NhaCungCap(rs.getString("maNCC"));
+                Thuoc thuoc = new Thuoc(maThuoc, tenThuoc, gia, hsd, nsx, thue, soLuongTon, mota, maLoai, maXuatXu, maDonViTinh, maNCC);
+                return thuoc;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Thuoc getThuocTheoTen(String mt) {
+        try {
+            PreparedStatement ps = ConnectDB.conn.prepareStatement("SELECT * FROM Thuoc WHERE tenThuoc = ?");
+            ps.setString(1, mt);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String maThuoc = rs.getString("maThuoc");
+                String tenThuoc = rs.getString("tenThuoc");
+                double gia = rs.getDouble("gia");
+
+                Date hsdDate = rs.getDate("hsd");
+                LocalDate hsd = (hsdDate != null) ? hsdDate.toLocalDate() : null;
+                System.out.println(hsd);
+
+                Date nsxDate = rs.getDate("nsx");
+                LocalDate nsx = (nsxDate != null) ? nsxDate.toLocalDate() : null;
+
+                double thue = rs.getDouble("thue");
+                int soLuongTon = rs.getInt("soLuongTon");
+                String mota = rs.getString("mota");
+
+                LoaiThuoc maLoai = new LoaiThuoc(rs.getString("maLoai"));
+                XuatXu maXuatXu = new XuatXu(rs.getString("maXuatXu"));
+                DonViTinh maDonViTinh = new DonViTinh(rs.getString("maDonViTinh"));
+
+                NhaCungCap maNCC = new NhaCungCap(rs.getString("maNCC"));
+                Thuoc thuoc = new Thuoc(maThuoc, tenThuoc, gia, hsd, nsx, thue, soLuongTon, mota, maLoai, maXuatXu, maDonViTinh, maNCC);
+                return thuoc;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     // Phương thức lấy tất cả các đối tượng Thuoc
@@ -342,4 +411,127 @@ public class Thuoc_DAO {
         }
         return n > 0;
     }
+
+    public ArrayList<Thuoc> getThuocTonKhoThap() {
+        ArrayList<Thuoc> list = new ArrayList<>();
+        String query = "SELECT * FROM Thuoc WHERE soLuongTon < 100";
+
+        // Use try-with-resources for resource management
+        try (PreparedStatement ps = ConnectDB.conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                // Fetch medicine details
+                String maThuoc = rs.getString("maThuoc");
+                String tenThuoc = rs.getString("tenThuoc");
+                double gia = rs.getDouble("gia");
+
+                // Convert Date to LocalDate, handle null values
+                Date hsdDate = rs.getDate("hsd");
+                Date nsxDate = rs.getDate("nsx");
+                LocalDate hsd = (hsdDate != null) ? hsdDate.toLocalDate() : null;
+                LocalDate nsx = (nsxDate != null) ? nsxDate.toLocalDate() : null;
+
+                double thue = rs.getDouble("thue");
+                int soLuongTon = rs.getInt("soLuongTon");
+                String mota = rs.getString("mota");
+
+                // Fetch foreign key related objects
+                LoaiThuoc maLoai = new LoaiThuoc(rs.getString("maLoai"));
+                XuatXu maXuatXu = new XuatXu(rs.getString("maXuatXu"));
+                DonViTinh maDonViTinh = new DonViTinh(rs.getString("maDonViTinh"));
+                NhaCungCap maNCC = new NhaCungCap(rs.getString("maNCC"));
+
+                // Create a Thuoc object and add it to the list
+                Thuoc thuoc = new Thuoc(maThuoc, tenThuoc, gia, hsd, nsx, thue, soLuongTon, mota, maLoai, maXuatXu, maDonViTinh, maNCC);
+                list.add(thuoc);
+            }
+        } catch (SQLException e) {
+            // Log the exception for debugging
+            System.err.println("Error retrieving medicines with low stock: " + e.getMessage());
+        }
+
+        return list;
+    }
+
+    public ArrayList<Thuoc> getThuocHetHan1Thang() {
+        ArrayList<Thuoc> list = new ArrayList<>();
+        try {
+            // Get the current date and calculate the expiration date threshold (1 month from now)
+            LocalDate currentDate = LocalDate.now();
+            LocalDate thresholdDate = currentDate.plusMonths(1);
+
+            // Convert LocalDate to java.sql.Date for SQL query compatibility
+            Date sqlThresholdDate = Date.valueOf(thresholdDate);
+
+            // Query to select medicines based on expiration date
+            PreparedStatement ps = ConnectDB.conn.prepareStatement(
+                    "SELECT t.* FROM Thuoc t "
+                    + "JOIN LoaiThuoc lt ON t.maLoai = lt.maLoai "
+                    + "WHERE t.hsd <= ?");
+            ps.setDate(1, sqlThresholdDate); // Set the expiration date threshold
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                // Fetch medicine details
+                String maThuoc = rs.getString("maThuoc");
+                String tenThuoc = rs.getString("tenThuoc");
+                double gia = rs.getDouble("gia");
+                Date hsd = rs.getDate("hsd");
+                Date nsx = rs.getDate("nsx");
+                double thue = rs.getDouble("thue");
+                int soLuongTon = rs.getInt("soLuongTon");
+                String mota = rs.getString("mota");
+
+                // Foreign keys and related objects
+                LoaiThuoc maLoai = new LoaiThuoc(rs.getString("maLoai"));
+                XuatXu maXuatXu = new XuatXu(rs.getString("maXuatXu"));
+                DonViTinh maDonViTinh = new DonViTinh(rs.getString("maDonViTinh"));
+                NhaCungCap maNCC = new NhaCungCap(rs.getString("maNCC"));
+
+                // Create a Thuoc object and add it to the list
+                Thuoc thuoc = new Thuoc(maThuoc, tenThuoc, gia, hsd.toLocalDate(), nsx.toLocalDate(), thue, soLuongTon, mota, maLoai, maXuatXu, maDonViTinh, maNCC);
+                list.add(thuoc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public ArrayList<Thuoc> getThuocTheoLoai(String tenLoai) {
+        ArrayList<Thuoc> list = new ArrayList<>();
+        try {
+            // Query to select medicines based on type
+            PreparedStatement ps = ConnectDB.conn.prepareStatement(
+                    "SELECT t.* FROM Thuoc t "
+                    + "JOIN LoaiThuoc lt ON t.maLoai = lt.maLoai "
+                    + "WHERE lt.tenLoai = ?");
+            ps.setString(1, tenLoai); // Set the type name in the query
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                // Fetch medicine details
+                String maThuoc = rs.getString("maThuoc");
+                String tenThuoc = rs.getString("tenThuoc");
+                double gia = rs.getDouble("gia");
+                Date hsd = rs.getDate("hsd");
+                Date nsx = rs.getDate("nsx");
+                double thue = rs.getDouble("thue");
+                int soLuongTon = rs.getInt("soLuongTon");
+                String mota = rs.getString("mota");
+
+                // Foreign keys and related objects
+                LoaiThuoc maLoai = new LoaiThuoc(rs.getString("maLoai"));
+                XuatXu maXuatXu = new XuatXu(rs.getString("maXuatXu"));
+                DonViTinh maDonViTinh = new DonViTinh(rs.getString("maDonViTinh"));
+                NhaCungCap maNCC = new NhaCungCap(rs.getString("maNCC"));
+
+                // Create a Thuoc object and add it to the list
+                Thuoc thuoc = new Thuoc(maThuoc, tenThuoc, gia, hsd.toLocalDate(), nsx.toLocalDate(), thue, soLuongTon, mota, maLoai, maXuatXu, maDonViTinh, maNCC);
+                list.add(thuoc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
 }
